@@ -1,0 +1,1386 @@
+# LIFEOS — THE ADAPTIVE PERSONAL OPERATING SYSTEM
+## Full-stack Google AI Studio build specification
+
+You are an expert software architect, senior full-stack engineer, interaction designer, optimization engineer, AI application developer, accessibility specialist, and QA engineer.
+
+Your mission is to design and build **LifeOS**, a premium, AI-assisted personal operating system that turns scattered goals, tasks, routines, and commitments into realistic schedules that adapt when real life changes.
+
+This is a real productivity application intended for everyday use by students, professionals, freelancers, and other individuals managing competing priorities.
+
+It must not be a superficial dashboard, static website, AI-generated mockup, or collection of decorative features.
+
+It must be a fully functional, persistent, secure, responsive web application with a real scheduling engine, working task management, meaningful AI features, and a polished interface.
+
+---
+
+# PART 1 — CRITICAL: APPROVAL-FIRST DEVELOPMENT
+
+Before generating any code, you MUST:
+
+1. Review this entire specification.
+2. Restate the actual problem LifeOS solves.
+3. Identify the primary users and workflows.
+4. Propose the technical architecture and libraries.
+5. Propose the Firestore data model and security rules.
+6. Explain the scheduling and replanning algorithms.
+7. Distinguish deterministic scheduling logic from Gemini-assisted interpretation and recommendations.
+8. Describe the architecture for previews, transactions, undo, and version history.
+9. Identify implementation risks, integrations requiring authorization, and any feature that cannot reliably be delivered.
+10. Provide a phased development roadmap.
+11. Provide a requirement-to-implementation checklist.
+12. Ask for my explicit approval.
+
+**STOP after presenting the plan. Do not generate, modify, or run application code until I approve it.**
+
+If Google AI Studio automatically begins implementation despite this instruction, prioritize the approved architecture and report what was generated.
+
+After approval, build incrementally, verify each phase, and do not abandon previously implemented functionality.
+
+Do not claim a feature works without verifying it.
+
+---
+
+# PART 2 — THE REAL PROBLEM
+
+My repetitive problem is organizing competing obligations and adjusting plans when my actual day differs from the original schedule.
+
+I am a college student who balances:
+
+- College classes.
+- Academic deadlines and examinations.
+- Coding and AI development projects.
+- Freelance or professional commitments.
+- Gym sessions.
+- Reading.
+- Guitar practice.
+- Drawing and creative hobbies.
+- Personal outings.
+- Sleep and free time.
+
+These activities have different urgency levels, durations, frequencies, and flexibility constraints.
+
+A traditional to-do list tells me what needs to be done, but it does not answer:
+
+- When should I do each task?
+- What fits realistically into my available time?
+- Which activities should be protected?
+- How can I plan around my preferred daily rhythm?
+- What if I wake up late?
+- What if an urgent task appears?
+- What happens when something takes twice as long?
+- Which tasks can move without missing their deadlines?
+- How do I maintain consistency without overloading every day?
+
+**LifeOS must solve these questions using transparent, constraint-aware scheduling, not arbitrary AI-generated calendars.**
+
+---
+
+# PART 3 — INPUT, PROCESS, OUTPUT, GOAL
+
+## Inputs
+
+Users provide:
+
+- Tasks.
+- Deadlines.
+- Goals.
+- Recurring activities.
+- Fixed commitments.
+- Available time windows.
+- Sleep preferences.
+- Preferred work periods.
+- Task durations.
+- Priorities.
+- Break preferences.
+- Energy preferences.
+- Optional descriptions of unexpected changes.
+
+## Process
+
+LifeOS must:
+
+1. Validate input.
+2. Convert natural-language input into structured data when requested.
+3. Calculate available schedule capacity.
+4. Detect conflicts and infeasible constraints.
+5. Prioritize deadlines and user-designated commitments.
+6. Generate a feasible time-block schedule.
+7. Explain important planning decisions.
+8. Adapt the plan when circumstances change.
+9. Preserve user-approved changes and completion history.
+10. Learn from observable scheduling patterns without making unsupported psychological or medical claims.
+
+## Outputs
+
+- Interactive daily timeline.
+- Weekly schedule.
+- Task manager.
+- Recurring routine planner.
+- Goal progress dashboard.
+- AI-assisted planning recommendations.
+- Replanning previews.
+- Schedule conflict warnings.
+- What-if simulations.
+- Planned-versus-actual analytics.
+- Exportable personal schedule.
+
+## Goal
+
+Reduce the time spent manually scheduling and rescheduling while helping users make practical progress on their commitments.
+
+The app must preserve user autonomy. It recommends plans, but the user makes final decisions.
+
+---
+
+# PART 4 — BRAND IDENTITY AND DESIGN DIRECTION
+
+Application name: LifeOS
+
+Tagline: "Your time. Intelligently arranged."
+
+Design a visually distinctive and highly usable product.
+
+## Visual identity
+
+Use:
+
+- Deep midnight/navy canvas.
+- Charcoal-tinted surfaces.
+- Electric cyan and teal primary accents.
+- Controlled ultraviolet highlights.
+- Soft gradients for important interactive surfaces.
+- Subtle glass-like panels where readability is preserved.
+- Thin borders.
+- Rounded cards.
+- Spacious layouts.
+- Premium typography.
+- Restrained motion.
+
+Avoid excessive neon, dense widgets, distracting particles, and unnecessary animations.
+
+Provide both dark and light themes.
+
+Dark mode should be the initial default.
+
+## Design inspiration
+
+Aim for the clarity and craftsmanship of high-quality contemporary SaaS tools.
+
+The product should feel like a sophisticated mission-control interface, not a game HUD or a generic productivity template.
+
+Use a design system with consistent colors, spacing, elevation, typography, and states.
+
+## Main desktop layout
+
+Left sidebar:
+
+- Mission Control
+- My Day
+- Timeline
+- Tasks
+- Goals
+- Routines
+- Reality Shift
+- Simulator
+- Insights
+- Settings
+
+Top bar:
+
+- Current date.
+- Local time.
+- Quick Add.
+- Generate Plan.
+- Replan.
+- Profile menu.
+
+Main content:
+
+- Clearly organized interactive information.
+- No fake charts or placeholder statistics in production.
+- Strong empty states and actionable controls.
+
+Mobile:
+
+- Responsive layout.
+- Compact navigation.
+- Touch-friendly controls.
+- Readable timeline.
+- Accessible alternative to drag-and-drop.
+
+Accessibility:
+
+- Keyboard navigation.
+- Visible focus styles.
+- Semantic HTML.
+- Appropriate contrast.
+- Accessible form labels.
+- Reduced-motion support.
+- Screen-reader-friendly actions.
+
+---
+
+# PART 5 — TECHNOLOGY ARCHITECTURE
+
+Use the following stack when supported:
+
+Frontend:
+- React.
+- TypeScript.
+- Tailwind CSS.
+- Lucide React.
+- Recharts.
+- date-fns and date-fns-tz or equivalent timezone-aware date utilities.
+- dnd-kit or an equivalent accessible drag-and-drop library.
+
+Backend:
+- Google AI Studio full-stack Node.js server runtime.
+- Firebase Authentication.
+- Cloud Firestore.
+- Gemini API accessed only through secured server-side endpoints.
+
+Use additional libraries when genuinely necessary.
+
+Implement real authentication and persistent storage.
+
+Do not simulate server responses.
+
+Do not create fake database connectivity.
+
+If Firebase integration needs permission, ask me to enable it using the official Google AI Studio integration.
+
+Use real Firestore Security Rules to isolate user accounts.
+
+Store secrets only in server-side environment variables or the platform's secret manager.
+
+Do not put secrets in browser code.
+
+Use deterministic TypeScript scheduling functions for time calculations and feasibility checks.
+
+Use Gemini for interpreting user intentions, extracting structured tasks, producing user-facing explanations, and proposing options.
+
+**Never allow Gemini to bypass scheduling constraints, invent time capacity, or silently overwrite approved plans.**
+
+---
+
+# PART 6 — USER AUTHENTICATION AND ONBOARDING
+
+## Authentication
+
+Implement Google Sign-In through Firebase Authentication.
+
+A user can:
+
+- Sign in.
+- Sign out.
+- Access their private workspace.
+- Reopen the application and retrieve their records.
+
+Ensure that one user cannot see another user's private data.
+
+## First-time onboarding
+
+Create a guided setup with a short, friendly series of screens.
+
+Collect:
+
+1. Preferred display name.
+2. Timezone, defaulting to detected timezone when available.
+3. Usual sleep window.
+4. Preferred focus hours.
+5. General availability.
+6. Typical work/study days.
+7. Preferred breaks.
+8. Personal goals.
+9. Important recurring commitments.
+
+Make optional questions skippable.
+
+Do not hardcode a universal morning routine.
+
+Do not assume everyone should work during daylight hours.
+
+Allow users to define unconventional schedules, including overnight sleep or work periods.
+
+Do not automatically infer unhealthy habits or make medical recommendations.
+
+After onboarding, provide a functional starter workspace.
+
+Do not automatically populate the user's real account with fictional tasks.
+
+---
+
+# PART 7 — MISSION CONTROL DASHBOARD
+
+This is the application's main screen.
+
+Display:
+
+## Welcome header
+
+A concise contextual greeting and the current day.
+
+Example:
+
+"Good afternoon. You have 4 scheduled activities and 2 flexible tasks remaining."
+
+The numbers must come from real user data.
+
+## Focus overview
+
+- Today's scheduled tasks.
+- Completed tasks.
+- Remaining estimated workload.
+- Upcoming deadlines.
+- Unscheduled tasks.
+- Next planned activity.
+
+## Today's timeline preview
+
+Display real scheduled activities in chronological order.
+
+## Time allocation
+
+Show how the available day is distributed across:
+
+- Fixed commitments.
+- Planned focus work.
+- Routines.
+- Breaks.
+- Unallocated time.
+
+## Capacity indicator
+
+Display whether requested workload fits the available scheduling window.
+
+Use actual calculated durations rather than arbitrary percentages.
+
+## Smart suggestions
+
+Examples:
+
+- Two tasks overlap.
+- A deadline is approaching.
+- A high-priority task remains unscheduled.
+- A task's deadline is impossible under current constraints.
+
+All suggestions must be grounded in actual user data.
+
+## Main actions
+
+- Add Task.
+- Generate Today.
+- Replan My Day.
+- View Calendar.
+- Run Simulation.
+
+Every visible action must work.
+
+---
+
+# PART 8 — TASK MANAGEMENT ENGINE
+
+Implement full CRUD functionality.
+
+Task fields:
+
+- Unique ID.
+- Title.
+- Description.
+- Category.
+- Priority: low, medium, high, critical.
+- Estimated duration in minutes.
+- Actual tracked duration when available.
+- Earliest start.
+- Due date/time.
+- Fixed versus flexible status.
+- Splittable or uninterrupted.
+- Minimum session length.
+- Preferred time of day.
+- Energy requirement: low, medium, high.
+- Status: inbox, scheduled, in progress, complete, skipped, archived.
+- Associated goal ID.
+- Creation timestamp.
+- Updated timestamp.
+
+Core actions:
+
+- Create task.
+- Edit task.
+- Delete task with confirmation.
+- Mark complete.
+- Mark incomplete.
+- Duplicate task.
+- Change priority.
+- Assign goal.
+- Schedule task.
+- Unschedule task.
+- Move task.
+- Search.
+- Filter.
+- Sort.
+
+For unfinished tasks, do not claim completion.
+
+Store completion history.
+
+Prevent duplicate submissions.
+
+Show accurate validation messages.
+
+Support natural-language task entry.
+
+Example:
+
+"Study networking for two hours before Thursday evening."
+
+Gemini should propose structured fields that the user can review before saving.
+
+Never guess an exact date when the sentence is ambiguous.
+
+---
+
+# PART 9 — GOALS AND ROUTINES
+
+## Goals
+
+Users can create longer-term goals.
+
+Examples:
+
+- Prepare for upcoming university exams.
+- Complete a software development project.
+- Maintain a weekly exercise routine.
+- Finish reading a book.
+- Practice guitar regularly.
+
+Goal fields:
+
+- Title.
+- Description.
+- Target date.
+- Category.
+- Linked tasks.
+- Milestones.
+- Progress measurement.
+- Status.
+
+Support milestones and task linking.
+
+Progress must be computed from explicit metrics or completed milestones, not invented by AI.
+
+## Routines
+
+Create recurring routines such as:
+
+- Gym on Monday, Wednesday, Friday, and Saturday.
+- Guitar practice three times weekly.
+- Reading on weekday evenings.
+- Coding practice for one hour on selected days.
+
+Support:
+
+- Daily recurrence.
+- Selected weekdays.
+- Weekly recurrence.
+- Interval-based recurrence when feasible.
+- Start date.
+- Optional end date.
+- Preferred time window.
+- Duration.
+- Fixed or flexible time.
+- Skip occurrence.
+- Edit one occurrence.
+- Edit future occurrences.
+
+Do not implement recurrence by endlessly duplicating records.
+
+Use recurrence definitions and generate bounded occurrences for the requested scheduling horizon.
+
+Prevent timezone-related duplicate occurrences.
+
+---
+
+# PART 10 — THE CORE SCHEDULING ENGINE
+
+This is the most important technical requirement.
+
+Build a deterministic, constraint-aware scheduling engine.
+
+Do NOT simply ask Gemini to write a calendar and assume it is valid.
+
+## Hard constraints
+
+Hard constraints must be respected.
+
+Examples:
+
+- Existing fixed calendar events.
+- User-locked activities.
+- Sleep/protected unavailable periods.
+- Required ordering dependencies.
+- No overlapping blocks on the same user schedule.
+- Task earliest-start limits.
+- Task latest-end limits.
+- Minimum session durations.
+- User-defined non-negotiable commitments.
+
+If constraints cannot all be satisfied, return a conflict report.
+
+Never silently violate a hard constraint.
+
+## Soft constraints
+
+Soft constraints are preferences that may be traded off.
+
+Examples:
+
+- Preferred study hours.
+- Preferred exercise time.
+- Desired activity distribution.
+- Energy matching.
+- Avoiding unnecessary context switching.
+- Keeping related work together.
+- Fairness between goals.
+- Minimizing changes to an existing schedule.
+- Reserving optional buffer time.
+
+Clearly distinguish preferences from strict rules.
+
+## Scheduling algorithm
+
+Implement a practical scheduling engine with:
+
+1. Time window normalization.
+2. Timezone-aware calculations.
+3. Fixed block placement.
+4. Available interval calculation.
+5. Task eligibility filtering.
+6. Deadline and priority evaluation.
+7. Deterministic task ordering.
+8. Duration-aware placement.
+9. Session splitting when permitted.
+10. Break and buffer handling.
+11. Conflict detection.
+12. Unscheduled-task explanations.
+
+A feasible MVP can use an explicitly documented greedy scheduling heuristic.
+
+For more advanced optimization, use a suitable bounded optimization method or compatible solver if supported.
+
+Do not claim globally optimal scheduling unless mathematically justified.
+
+Make scheduling results deterministic for identical inputs and configuration.
+
+## Priority logic
+
+Prioritize:
+
+- Hard feasibility.
+- Genuine deadline urgency.
+- Critical tasks.
+- User preferences.
+- Goal consistency.
+- Reduced schedule disruption.
+
+Use transparent scoring or rule ordering.
+
+Provide an explanation when a requested task cannot fit.
+
+Never drop tasks silently.
+
+## Scheduling output
+
+Return:
+
+- Schedule blocks.
+- Start and end timestamps.
+- Scheduled task IDs.
+- Unscheduled tasks.
+- Conflict reports.
+- Important scheduling trade-offs.
+- Reason codes for decisions.
+
+All time blocks must be validated before display and persistence.
+
+---
+
+# PART 11 — INTERACTIVE TIME CANVAS
+
+Build a polished daily and weekly scheduler.
+
+## Daily view
+
+Use a vertical timeline with clear time labels.
+
+Each block displays:
+
+- Activity title.
+- Category.
+- Start/end times.
+- Duration.
+- Completion status.
+- Priority indicator.
+- Locked status when applicable.
+
+Show the current time indicator.
+
+## Weekly view
+
+Use a seven-day calendar grid.
+
+Support:
+
+- Click to create.
+- Drag to reschedule.
+- Resize duration.
+- Lock or unlock blocks.
+- Move a flexible block.
+- Open task details.
+- Mark complete.
+
+On every move or resize:
+
+1. Validate constraints.
+2. Detect collisions.
+3. Show meaningful errors if invalid.
+4. Persist only a valid change.
+5. Revert visual state if persistence fails.
+
+Provide accessible form-based alternatives for all drag-and-drop interactions.
+
+## Quick editing
+
+Clicking an activity should open a clear edit panel.
+
+Allow users to modify task and schedule information without losing changes.
+
+---
+
+# PART 12 — REALITY SHIFT ENGINE
+
+This is LifeOS's signature feature.
+
+Add a prominent action:
+
+**"Reality Shift — Replan My Day"**
+
+Its purpose is to adapt an existing approved schedule when life changes.
+
+## Supported scenarios
+
+Examples:
+
+- "I woke up two hours late."
+- "My assignment took an extra 90 minutes."
+- "I have an unexpected meeting from 3 PM to 4 PM."
+- "I have only two hours left today."
+- "Move my coding task to tomorrow."
+- "I want to keep tonight free."
+- "A new urgent deadline appeared."
+- "I already finished my reading task."
+
+## Workflow
+
+1. User types a change or selects a predefined scenario.
+2. Gemini interprets the request into a proposed structured change.
+3. The user reviews ambiguous details.
+4. The scheduling engine loads the latest approved schedule.
+5. Preserve completed tasks.
+6. Preserve past activity records.
+7. Preserve locked blocks and protected commitments.
+8. Recalculate the remaining available time.
+9. Reassign eligible flexible tasks.
+10. Flag displaced or unschedulable tasks.
+11. Present a before-and-after comparison.
+12. Explain what changed.
+13. Let the user accept or reject the proposal.
+
+## Critical rules
+
+Never update the real schedule merely because Gemini generated a plan.
+
+Always display a preview first.
+
+Always require explicit user approval before committing a replan.
+
+Do not modify events earlier than the current planning cutoff, except when the user explicitly edits historical records.
+
+Do not overwrite completed tasks.
+
+Do not silently move locked commitments.
+
+Do not push tasks beyond deadlines without a clearly visible warning.
+
+If no feasible schedule exists, explain the conflict and offer options.
+
+## Change summary
+
+Example:
+
+"Your evening availability decreased by 90 minutes. The project task has been moved to tomorrow. Your fixed class and gym session remain unchanged. One flexible task could not be scheduled before its deadline."
+
+The change summary must be computed from real differences, not fabricated.
+
+## Preview and apply model
+
+Store proposed changes separately from the active schedule.
+
+Only apply a proposal after the user approves it.
+
+Use version checking or transactions to prevent accepting a proposal based on an outdated schedule.
+
+If the active schedule changed since the preview was generated, require recalculation.
+
+## Undo
+
+Provide an Undo action that restores the previous schedule version when safe.
+
+Use version snapshots or reversible change sets.
+
+Do not undo unrelated new changes without warning.
+
+---
+
+# PART 13 — WHAT-IF SIMULATOR
+
+Build a sandbox for experimenting with alternative schedules.
+
+Users should be able to test questions such as:
+
+- What if I wake up at 9 AM instead of 7 AM?
+- What if I study two extra hours this week?
+- What if I skip one optional activity?
+- What if I add a coding project with a Friday deadline?
+- What if I dedicate my evenings to studying?
+- What if I reserve one entire day for personal activities?
+
+## Simulator rules
+
+1. Copy the relevant current schedule and constraints into an isolated simulation.
+2. Apply hypothetical changes only within that simulation.
+3. Run the same deterministic scheduling engine.
+4. Compare feasibility and time allocation.
+5. Display differences and trade-offs.
+6. Let the user discard the scenario.
+7. Allow the user to apply a scenario only after explicit confirmation.
+
+Simulations must never change live data automatically.
+
+Show comparisons such as:
+
+- Additional available focus time.
+- Number of tasks scheduled.
+- Displaced activities.
+- Deadline conflicts.
+- Change in unallocated time.
+
+Do not claim that increased scheduled hours guarantee increased productivity.
+
+---
+
+# PART 14 — AI PLANNING COPILOT
+
+Add an AI planning assistant integrated into the application.
+
+The assistant can help users:
+
+- Convert natural language into tasks.
+- Break large goals into actionable milestones.
+- Identify schedule bottlenecks.
+- Explain why a task was moved.
+- Suggest alternative schedule configurations.
+- Produce end-of-week summaries.
+- Create possible study schedules.
+- Suggest reasonable duration estimates when requested.
+
+## Example prompts
+
+"Help me fit three study sessions around my existing commitments."
+
+"Why wasn't my project task scheduled?"
+
+"Can I fit another gym session this week?"
+
+"Show me three ways to finish my assignment before Friday."
+
+"Help me plan my free evening without affecting tomorrow's commitments."
+
+## Safety and reliability
+
+The assistant must never invent existing tasks, appointments, or deadlines.
+
+It must retrieve the relevant actual user records.
+
+All proposed changes require review before being saved.
+
+Gemini should generate schema-validated structured suggestions.
+
+Deterministic application logic must verify feasibility.
+
+When the user's instruction is ambiguous, request clarification or present labeled assumptions.
+
+Do not provide medical or psychological assessments based on productivity data.
+
+Do not use guilt-based or shaming language.
+
+Avoid automatically interpreting unplanned time as wasted time.
+
+Free time is a valid part of a schedule.
+
+---
+
+# PART 15 — FOCUS MODE AND EXECUTION TRACKING
+
+Create a focused execution screen.
+
+Features:
+
+- Current task.
+- Planned duration.
+- Countdown or elapsed timer.
+- Start.
+- Pause.
+- Resume.
+- Complete.
+- Stop.
+- Optional notes.
+- Actual time spent.
+
+Timer accuracy must not rely only on a decrementing browser interval.
+
+Store timestamps and accumulated duration so timing remains accurate after tab suspension or refresh.
+
+For authenticated users, persist running session state when feasible.
+
+Prevent overlapping active sessions for the same user.
+
+When a session is completed, update the associated task's actual effort.
+
+Allow the user to correct recorded time manually.
+
+No intrusive notifications or gamified punishment.
+
+---
+
+# PART 16 — TIME INTELLIGENCE AND INSIGHTS
+
+Create an analytics page using real historical records.
+
+Show:
+
+- Planned versus completed tasks.
+- Planned versus actual durations.
+- Time allocation by category.
+- Completed focus sessions.
+- Scheduled workload over time.
+- Deadline completion patterns.
+- Unscheduled workload.
+- Goal milestone progress.
+- Frequency of replanning.
+- Estimated duration accuracy.
+
+Provide daily, weekly, and monthly views where enough data exists.
+
+Use Recharts.
+
+## Intelligent insights
+
+Possible insights:
+
+"Your coding tasks took longer than their estimates on several recorded sessions."
+
+"Your Friday schedule contains more planned work than your configured availability."
+
+"Two important deadlines are approaching, but no time is reserved for them."
+
+Insights must be backed by actual data.
+
+Clearly explain the basis of each statement.
+
+Do not fabricate trends when the sample size is insufficient.
+
+Do not claim to measure concentration, intelligence, burnout, or mental health from time-tracking statistics.
+
+---
+
+# PART 17 — SEARCH, IMPORT, EXPORT, AND CALENDAR INTEROPERABILITY
+
+Provide:
+
+- Global task search.
+- Filtering by category, status, priority, and date.
+- Export tasks and activity history as JSON.
+- Export schedule blocks as CSV.
+- Import tasks from CSV with preview and validation.
+- Export calendar events to an ICS file.
+
+Handle invalid records and duplicate IDs carefully.
+
+Protect against spreadsheet formula injection in CSV exports.
+
+Use appropriate calendar timezone representations.
+
+## Optional Google Calendar integration
+
+If available through Google AI Studio's officially supported Workspace integration:
+
+- Allow users to connect their own Google Calendar with explicit consent.
+- Begin with read-only access.
+- Display imported commitments separately from native events.
+- Treat imported busy intervals as scheduling constraints.
+- Clearly identify the source calendar.
+- Do not overwrite external events.
+- Add outbound calendar writes only as an explicitly approved later feature.
+
+If unavailable, retain functional manual calendar entry and ICS export.
+
+Never pretend a synchronization succeeded.
+
+Do not make Google Calendar integration a dependency for the core app.
+
+---
+
+# PART 18 — PERSISTENCE AND DATA MODEL
+
+Use Firebase Authentication and Cloud Firestore.
+
+Suggested schema:
+
+users/{uid}
+- profile
+- timezone
+- preferences
+- onboardingComplete
+- createdAt
+- updatedAt
+
+users/{uid}/tasks/{taskId}
+- task fields
+- lifecycle status
+- goal references
+- timestamps
+
+users/{uid}/goals/{goalId}
+- goal and milestone metadata
+
+users/{uid}/routines/{routineId}
+- recurrence configuration
+
+users/{uid}/scheduleBlocks/{blockId}
+- startAt
+- endAt
+- taskId
+- blockType
+- locked
+- source
+- scheduleVersion
+- timestamps
+
+users/{uid}/plans/{planId}
+- scheduling horizon
+- current version
+- status
+- timestamps
+
+users/{uid}/planVersions/{versionId}
+- planId
+- version
+- snapshot or change set
+- reason
+- createdAt
+
+users/{uid}/focusSessions/{sessionId}
+- taskId
+- startedAt
+- endedAt
+- accumulatedSeconds
+- status
+
+users/{uid}/activities/{activityId}
+- action
+- affected record
+- timestamp
+
+users/{uid}/simulations/{simulationId}
+- base version
+- hypothetical inputs
+- output summary
+- timestamps
+
+Use a sensible normalized schema with explicit relationships.
+
+Avoid unbounded arrays in a single Firestore document.
+
+Use Firestore transactions or equivalent concurrency protection for multi-record changes.
+
+Apply user-scoped security rules to every collection.
+
+Validate server requests independently of browser validation.
+
+Use timestamp storage that handles timezone changes correctly.
+
+Use user-local dates for calendar-day semantics.
+
+Store plan versions carefully so simulations and approved plans can be compared.
+
+Never overwrite the current plan with an unapproved proposal.
+
+---
+
+# PART 19 — API DESIGN
+
+Create a secure server-side API layer for operations requiring server authority, AI processing, or atomic scheduling changes.
+
+Suggested endpoints:
+
+POST /api/ai/parse-task
+POST /api/ai/explain-plan
+POST /api/ai/interpret-change
+POST /api/plans/generate
+POST /api/plans/preview-replan
+POST /api/plans/apply-replan
+POST /api/plans/undo
+POST /api/simulations/run
+GET /api/insights/summary
+
+Adjust the exact routing structure to the framework.
+
+For privileged endpoints:
+
+- Verify the authenticated user.
+- Obtain the user identity from a verified token or authenticated session.
+- Never trust a client-supplied UID alone.
+- Enforce strict input schemas.
+- Apply reasonable request-size limits.
+- Restrict access to the authenticated user's records.
+- Use version checks on schedule mutations.
+- Handle network and database errors safely.
+
+Implement appropriate retry and idempotency protections.
+
+Limit excessive AI requests.
+
+Use server-side secrets for Gemini API calls.
+
+Do not expose credentials in logs or API responses.
+
+---
+
+# PART 20 — PERFORMANCE AND RELIABILITY
+
+The application must support everyday use.
+
+Implement:
+
+- Skeleton loading states.
+- Helpful empty states.
+- Error boundaries.
+- Friendly validation errors.
+- Confirmation dialogs.
+- Save-status feedback.
+- Duplicate-submission protection.
+- Debounced search.
+- Efficient database queries.
+- Pagination or bounded queries where needed.
+- Robust timezone handling.
+- Responsive interactions.
+- Recovery from network failures.
+- Accessibility.
+- Clear retry options.
+
+Avoid unbounded AI context.
+
+Send only relevant records to AI features.
+
+If an AI call fails, the core manual planner must still work.
+
+If Firestore is temporarily unavailable, do not falsely claim a change was saved.
+
+If a schedule proposal cannot be committed, keep the approved schedule unchanged.
+
+---
+
+# PART 21 — DEMONSTRATION SCENARIO
+
+The app must support a concrete, authentic demonstration.
+
+Use the following scenario as an illustrative example, not automatically inserted into real user accounts.
+
+A college student wants to organize:
+
+- Weekday classes.
+- Upcoming examination preparation.
+- A software development project.
+- Gym sessions four days per week.
+- Guitar practice.
+- Reading.
+- Sketching.
+- Personal free time.
+
+Some activities have deadlines.
+
+Some activities have fixed time windows.
+
+Others are flexible.
+
+The demonstration should work as follows:
+
+1. User creates a profile.
+2. User adds fixed class commitments.
+3. User adds academic tasks with deadlines.
+4. User adds recurring exercise and hobbies.
+5. User generates a weekly schedule.
+6. The app shows scheduled and unscheduled tasks.
+7. User marks one task completed.
+8. User simulates waking up two hours later than planned.
+9. LifeOS generates a revised schedule.
+10. The user sees exactly which blocks change.
+11. The user accepts or rejects the changes.
+12. The dashboard and timeline reflect the approved state.
+13. Data remains intact after refresh.
+14. Another user signs in and sees only their own workspace.
+
+Build a clear, optional demo mode with fictional sample data for testing.
+
+Do not mix demo records with private production data unless the user explicitly requests a clearly labeled import.
+
+---
+
+# PART 22 — NON-NEGOTIABLE ACCEPTANCE TESTS
+
+Implement and run meaningful automated and manual tests.
+
+At minimum, verify:
+
+## Authentication
+
+1. Sign-in works.
+2. Sign-out works.
+3. User data persists after reauthentication.
+4. One user cannot access another user's records.
+
+## Tasks and routines
+
+5. Creating, editing, and deleting tasks works.
+6. Tasks persist after refresh.
+7. Recurring activities appear on the correct dates.
+8. Editing one routine occurrence does not accidentally modify all occurrences.
+9. Overnight time windows work correctly.
+10. Input validation rejects invalid durations and malformed dates.
+
+## Scheduling
+
+11. No two blocks overlap unless explicitly permitted by the data model.
+12. Locked events never move during automatic replanning.
+13. Protected sleep periods remain unavailable.
+14. Past completed sessions are preserved.
+15. Tasks are not scheduled before their earliest permitted start.
+16. Unmet deadlines produce visible warnings.
+17. Excess workload produces an unscheduled-task report.
+18. Identical inputs and settings yield identical plans.
+19. An unsplittable task remains uninterrupted.
+20. Splittable tasks respect minimum session lengths.
+21. Schedule calculations work across midnight.
+22. DST boundaries are tested for timezones where daylight saving applies.
+
+## Reality Shift
+
+23. A replan creates a preview without modifying live data.
+24. Rejecting a preview leaves the original schedule unchanged.
+25. Accepting a valid preview updates the correct records.
+26. A stale preview cannot overwrite a newer schedule.
+27. Undo restores the prior schedule when permitted.
+28. An impossible replan returns an explicit conflict.
+29. An AI-generated instruction cannot bypass hard constraints.
+30. A failed database transaction does not leave a partially updated plan.
+
+## Simulator
+
+31. Simulation never mutates real schedule data.
+32. Scenario comparisons use actual computed data.
+33. Applying a scenario requires explicit confirmation.
+
+## Focus and analytics
+
+34. Focus timer remains accurate after browser tab suspension.
+35. Paused time is not counted as active effort.
+36. Completed activity updates corresponding statistics.
+37. Empty analytics do not display fabricated data.
+
+## Quality
+
+38. All visible primary buttons work.
+39. Desktop and mobile layouts are usable.
+40. Keyboard navigation works.
+41. No critical console errors remain.
+42. No unresolved imports or TypeScript errors remain.
+43. Errors produce understandable feedback.
+44. A new user can complete onboarding without developer assistance.
+45. A trusted external tester can use the app without seeing another user's private data.
+
+Provide a test matrix showing pass, fail, or not tested.
+
+Never report unexecuted tests as passed.
+
+---
+
+# PART 23 — DEVELOPMENT PHASES
+
+After my approval, implement in this order:
+
+## Phase A — Foundation
+
+- Application shell.
+- Design system.
+- Authentication.
+- Firestore integration.
+- Onboarding.
+- Navigation.
+
+## Phase B — Real productivity data
+
+- Task management.
+- Goals.
+- Recurring routines.
+- Persistent calendar blocks.
+- User settings.
+
+## Phase C — Scheduling core
+
+- Constraint validation.
+- Available-time calculation.
+- Deterministic scheduler.
+- Conflict explanations.
+- Schedule generation.
+- Timeline.
+
+## Phase D — Signature features
+
+- Reality Shift.
+- Before-and-after schedule preview.
+- Approval workflow.
+- Plan versioning.
+- Undo.
+- What-if simulator.
+
+## Phase E — AI intelligence
+
+- Natural-language parsing.
+- AI planning copilot.
+- Schedule explanations.
+- AI-assisted scenario interpretation.
+
+## Phase F — Execution and insights
+
+- Focus timer.
+- Planned-versus-actual tracking.
+- Analytics.
+- Export/import.
+
+## Phase G — Hardening and launch
+
+- Security review.
+- Automated tests.
+- Manual acceptance tests.
+- Responsive refinement.
+- Onboarding polish.
+- Empty states.
+- Performance.
+- Deployment readiness.
+
+Verify each phase before starting the next.
+
+If implementation time or system limitations force prioritization, the minimum complete release must include authentication, persistent tasks, a real conflict-aware scheduler, interactive timeline, Reality Shift preview/approval, and basic insights.
+
+Do not build decorative secondary features while core functionality is broken.
+
+---
+
+# PART 24 — FIRST-TIME USER EXPERIENCE
+
+The product should be understandable without instructions from its developer.
+
+Show a short welcome experience:
+
+"LifeOS helps you turn your priorities into a realistic schedule — and adapt that plan when life changes."
+
+Present three main steps:
+
+1. Add what matters.
+2. Generate your plan.
+3. Replan when life changes.
+
+Provide an optional guided walkthrough.
+
+Show meaningful empty states.
+
+Remove test-only controls, debugging output, and development placeholders from production.
+
+Do not hide real failures behind generic success messages.
+
+---
+
+# PART 25 — HANDSHAKE AI MISSION ALIGNMENT
+
+This project is being built for the Handshake AI "Vibe Code an App" mission.
+
+The mission expects:
+
+- A real repetitive problem.
+- A documented planning process.
+- Clear user requirements.
+- An approved implementation plan.
+- Real input data.
+- Iterative testing.
+- Bug fixing.
+- Permanent rules that prevent recurring issues.
+- A usable application.
+- Sharing with a trusted user.
+- A final live link.
+
+Support that workflow by maintaining:
+
+- A concise requirements summary.
+- An implementation checklist.
+- A changelog.
+- A known-issues list.
+- Testing instructions.
+- A first-time user guide.
+
+Do not invent test outcomes or claim that another person tested the app.
+
+The final result should be practical and impressive enough to serve as a portfolio project demonstrating full-stack engineering, generative AI integration, scheduling logic, UX design, database management, and iterative testing.
+
+---
+
+# PART 26 — FINAL EXPECTATIONS
+
+The final application should:
+
+- Be useful as an everyday planning tool.
+- Have a polished, distinctive interface.
+- Persist real user data.
+- Support separate user accounts.
+- Perform real, constraint-aware scheduling.
+- Adapt plans without silently changing approved information.
+- Provide transparent AI assistance.
+- Support meaningful simulations.
+- Track execution and outcomes accurately.
+- Be responsive.
+- Be accessible.
+- Be secure.
+- Be reliable.
+- Be publishable through Google AI Studio's supported deployment workflow.
+
+Do not fake completed features.
+
+Do not display hardcoded productivity results.
+
+Do not make external calendar changes without authorization.
+
+Do not add subscription billing or unnecessary integrations.
+
+Make LifeOS useful before making it complicated.
+
+**START NOW WITH THE IMPLEMENTATION PLAN ONLY. PRESENT IT FOR MY APPROVAL. DO NOT WRITE CODE YET.**

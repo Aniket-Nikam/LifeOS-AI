@@ -1,0 +1,410 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core primitives
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidIsoString(val) {
+      return val is string && val.size() >= 10 && val.size() <= 40;
+    }
+
+    function isValidHHmm(val) {
+      return val is string && val.size() == 5 && val.matches('^([01]\\d|2[0-3]):[0-5]\\d$');
+    }
+
+    function isValidCategory(cat) {
+      return cat is string && cat in ['academic', 'coding', 'work', 'fitness', 'hobby', 'personal'];
+    }
+
+    function isValidPriority(p) {
+      return p is string && p in ['low', 'medium', 'high', 'critical'];
+    }
+
+    // 1. UserProfile validation
+    function isValidUserProfile(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'displayName', 'timezone', 'sleepStartHHmm', 'sleepEndHHmm',
+        'focusStartHHmm', 'focusEndHHmm', 'workDays', 'breakDurationMinutes',
+        'maxContinuousWorkMinutes', 'theme', 'onboardingComplete', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'displayName', 'timezone', 'sleepStartHHmm', 'sleepEndHHmm',
+        'focusStartHHmm', 'focusEndHHmm', 'workDays', 'breakDurationMinutes',
+        'maxContinuousWorkMinutes', 'theme', 'onboardingComplete', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+      data.timezone is string && data.timezone.size() >= 1 && data.timezone.size() <= 80 &&
+      isValidHHmm(data.sleepStartHHmm) &&
+      isValidHHmm(data.sleepEndHHmm) &&
+      isValidHHmm(data.focusStartHHmm) &&
+      isValidHHmm(data.focusEndHHmm) &&
+      data.workDays is list && data.workDays.size() <= 7 &&
+      data.breakDurationMinutes is number && data.breakDurationMinutes >= 0 && data.breakDurationMinutes <= 120 &&
+      data.maxContinuousWorkMinutes is number && data.maxContinuousWorkMinutes >= 15 && data.maxContinuousWorkMinutes <= 480 &&
+      data.theme is string && data.theme in ['dark', 'light'] &&
+      data.onboardingComplete is bool &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 2. Task validation (separate estimatedMinutes, actualMinutes, remainingMinutes)
+    function isValidTask(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'title', 'description', 'category', 'priority',
+        'estimatedMinutes', 'actualMinutes', 'remainingMinutes',
+        'isFixed', 'isSplittable', 'minSessionMinutes',
+        'preferredTimeOfDay', 'energyLevel', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'title', 'description', 'category', 'priority',
+        'estimatedMinutes', 'actualMinutes', 'remainingMinutes',
+        'earliestStartAt', 'dueAt', 'isFixed', 'fixedStartAt', 'fixedEndAt',
+        'isSplittable', 'minSessionMinutes', 'preferredTimeOfDay',
+        'energyLevel', 'status', 'goalId', 'completedAt', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      data.description is string && data.description.size() <= 2000 &&
+      isValidCategory(data.category) &&
+      isValidPriority(data.priority) &&
+      data.estimatedMinutes is number && data.estimatedMinutes >= 5 && data.estimatedMinutes <= 1440 &&
+      data.actualMinutes is number && data.actualMinutes >= 0 && data.actualMinutes <= 10000 &&
+      data.remainingMinutes is number && data.remainingMinutes >= 0 && data.remainingMinutes <= 1440 &&
+      data.isFixed is bool &&
+      data.isSplittable is bool &&
+      data.minSessionMinutes is number && data.minSessionMinutes >= 5 && data.minSessionMinutes <= 480 &&
+      data.preferredTimeOfDay is string && data.preferredTimeOfDay in ['morning', 'afternoon', 'evening', 'night', 'any'] &&
+      data.energyLevel is string && data.energyLevel in ['low', 'medium', 'high'] &&
+      data.status is string && data.status in ['inbox', 'scheduled', 'in_progress', 'complete', 'skipped', 'archived'] &&
+      (!('earliestStartAt' in data) || data.earliestStartAt is string && data.earliestStartAt.size() <= 40) &&
+      (!('dueAt' in data) || data.dueAt is string && data.dueAt.size() <= 40) &&
+      (!('fixedStartAt' in data) || data.fixedStartAt is string && data.fixedStartAt.size() <= 40) &&
+      (!('fixedEndAt' in data) || data.fixedEndAt is string && data.fixedEndAt.size() <= 40) &&
+      (!('goalId' in data) || data.goalId is string && data.goalId.size() <= 128) &&
+      (!('completedAt' in data) || data.completedAt is string && data.completedAt.size() <= 40) &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 3. Goal validation
+    function isValidGoal(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'title', 'description', 'category', 'targetDate',
+        'milestones', 'progressPercent', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'title', 'description', 'category', 'targetDate',
+        'milestones', 'progressPercent', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      data.description is string && data.description.size() <= 2000 &&
+      isValidCategory(data.category) &&
+      data.targetDate is string && data.targetDate.size() <= 40 &&
+      data.milestones is list && data.milestones.size() <= 30 &&
+      data.progressPercent is number && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+      data.status is string && data.status in ['active', 'completed', 'paused'] &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 4. Routine validation
+    function isValidRoutine(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'title', 'category', 'frequency', 'daysOfWeek', 'intervalDays',
+        'startDate', 'preferredStartHHmm', 'preferredEndHHmm', 'durationMinutes',
+        'isFixed', 'priority', 'skippedDates', 'overridesJson', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'title', 'category', 'frequency', 'daysOfWeek', 'intervalDays',
+        'startDate', 'endDate', 'preferredStartHHmm', 'preferredEndHHmm', 'durationMinutes',
+        'isFixed', 'priority', 'skippedDates', 'overridesJson', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      isValidCategory(data.category) &&
+      data.frequency is string && data.frequency in ['daily', 'weekdays', 'selected_days', 'weekly', 'interval'] &&
+      data.daysOfWeek is list && data.daysOfWeek.size() <= 7 &&
+      data.intervalDays is number && data.intervalDays >= 1 && data.intervalDays <= 90 &&
+      data.startDate is string && data.startDate.size() <= 20 &&
+      (!('endDate' in data) || data.endDate is string && data.endDate.size() <= 20) &&
+      isValidHHmm(data.preferredStartHHmm) &&
+      isValidHHmm(data.preferredEndHHmm) &&
+      data.durationMinutes is number && data.durationMinutes >= 5 && data.durationMinutes <= 720 &&
+      data.isFixed is bool &&
+      isValidPriority(data.priority) &&
+      data.skippedDates is list && data.skippedDates.size() <= 366 &&
+      data.overridesJson is string && data.overridesJson.size() <= 10000 &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 5. ScheduleBlock validation
+    function isValidScheduleBlock(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'planId', 'scheduleVersion', 'dateKey', 'startAt', 'endAt',
+        'durationMinutes', 'title', 'category', 'blockType', 'locked',
+        'status', 'priority', 'reasonCode', 'source', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'planId', 'scheduleVersion', 'dateKey', 'startAt', 'endAt',
+        'durationMinutes', 'title', 'category', 'blockType', 'taskId',
+        'routineId', 'occurrenceDate', 'locked', 'status', 'priority',
+        'reasonCode', 'source', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.planId is string && data.planId.size() >= 1 && data.planId.size() <= 128 &&
+      data.scheduleVersion is number && data.scheduleVersion >= 1 &&
+      data.dateKey is string && data.dateKey.size() == 10 &&
+      isValidIsoString(data.startAt) &&
+      isValidIsoString(data.endAt) &&
+      data.durationMinutes is number && data.durationMinutes >= 5 && data.durationMinutes <= 1440 &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      data.category is string && data.category in ['academic', 'coding', 'work', 'fitness', 'hobby', 'personal', 'break', 'external'] &&
+      data.blockType is string && data.blockType in ['task', 'routine', 'fixed', 'break', 'external_calendar'] &&
+      (!('taskId' in data) || data.taskId is string && data.taskId.size() <= 128) &&
+      (!('routineId' in data) || data.routineId is string && data.routineId.size() <= 128) &&
+      (!('occurrenceDate' in data) || data.occurrenceDate is string && data.occurrenceDate.size() <= 20) &&
+      data.locked is bool &&
+      data.status is string && data.status in ['planned', 'in_progress', 'completed', 'skipped'] &&
+      isValidPriority(data.priority) &&
+      data.reasonCode is string && data.reasonCode.size() <= 120 &&
+      data.source is string && data.source in ['scheduler', 'manual', 'reality_shift', 'google_calendar'] &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 6. Plan validation
+    function isValidPlan(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'horizonStart', 'horizonEnd', 'currentVersion', 'status', 'lastReason', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'horizonStart', 'horizonEnd', 'currentVersion', 'status', 'lastReason', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.horizonStart is string && data.horizonStart.size() <= 20 &&
+      data.horizonEnd is string && data.horizonEnd.size() <= 20 &&
+      data.currentVersion is number && data.currentVersion >= 1 &&
+      data.status is string && data.status in ['active', 'archived'] &&
+      data.lastReason is string && data.lastReason.size() <= 500 &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 7. PlanVersion validation (immutable server-validated version history)
+    function isValidPlanVersion(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'planId', 'version', 'parentVersion', 'reason',
+        'blockCount', 'chunkCount', 'summaryText', 'serverValidated', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'planId', 'version', 'parentVersion', 'reason',
+        'blockCount', 'chunkCount', 'summaryText', 'serverValidated', 'createdAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.planId is string && data.planId.size() >= 1 && data.planId.size() <= 128 &&
+      data.version is number && data.version >= 1 &&
+      data.parentVersion is number && data.parentVersion >= 0 &&
+      data.reason is string && data.reason.size() >= 1 && data.reason.size() <= 500 &&
+      data.blockCount is number && data.blockCount >= 0 && data.blockCount <= 500 &&
+      data.chunkCount is number && data.chunkCount >= 0 && data.chunkCount <= 20 &&
+      data.summaryText is string && data.summaryText.size() <= 2000 &&
+      data.serverValidated is bool && data.serverValidated == true &&
+      isValidIsoString(data.createdAt);
+    }
+
+    // 8. PlanVersionChunk validation (bounded <= 40 blocks per document)
+    function isValidPlanVersionChunk(data, uid) {
+      return data.keys().hasAll(['userId', 'version', 'chunkIndex', 'blocks', 'createdAt']) &&
+      data.keys().hasOnly(['userId', 'version', 'chunkIndex', 'blocks', 'createdAt']) &&
+      data.userId is string && data.userId == uid &&
+      data.version is number && data.version >= 1 &&
+      data.chunkIndex is number && data.chunkIndex >= 0 && data.chunkIndex <= 20 &&
+      data.blocks is list && data.blocks.size() <= 40 &&
+      isValidIsoString(data.createdAt);
+    }
+
+    // 9. FocusSession validation
+    function isValidFocusSession(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'taskId', 'taskTitle', 'status', 'plannedMinutes',
+        'startedAt', 'accumulatedSeconds', 'notes', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'taskId', 'taskTitle', 'status', 'plannedMinutes',
+        'startedAt', 'lastResumedAt', 'endedAt', 'accumulatedSeconds', 'notes', 'createdAt', 'updatedAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.taskId is string && data.taskId.size() >= 1 && data.taskId.size() <= 128 &&
+      data.taskTitle is string && data.taskTitle.size() >= 1 && data.taskTitle.size() <= 200 &&
+      data.status is string && data.status in ['running', 'paused', 'completed', 'stopped'] &&
+      data.plannedMinutes is number && data.plannedMinutes >= 1 && data.plannedMinutes <= 1440 &&
+      isValidIsoString(data.startedAt) &&
+      (!('lastResumedAt' in data) || data.lastResumedAt is string && data.lastResumedAt.size() <= 40) &&
+      (!('endedAt' in data) || data.endedAt is string && data.endedAt.size() <= 40) &&
+      data.accumulatedSeconds is number && data.accumulatedSeconds >= 0 && data.accumulatedSeconds <= 864000 &&
+      data.notes is string && data.notes.size() <= 1000 &&
+      isValidIsoString(data.createdAt) &&
+      isValidIsoString(data.updatedAt);
+    }
+
+    // 10. ActivityLog validation (immutable audit trail)
+    function isValidActivityLog(data, uid) {
+      return data.keys().hasAll(['userId', 'action', 'targetId', 'summary', 'createdAt']) &&
+      data.keys().hasOnly(['userId', 'action', 'targetId', 'summary', 'createdAt']) &&
+      data.userId is string && data.userId == uid &&
+      data.action is string && data.action.size() >= 1 && data.action.size() <= 80 &&
+      data.targetId is string && data.targetId.size() >= 1 && data.targetId.size() <= 128 &&
+      data.summary is string && data.summary.size() >= 1 && data.summary.size() <= 500 &&
+      isValidIsoString(data.createdAt);
+    }
+
+    // 11. SimulationRecord validation
+    function isValidSimulationRecord(data, uid) {
+      return data.keys().hasAll([
+        'userId', 'title', 'baseVersion', 'scenarioType', 'summaryText',
+        'scheduledCount', 'unscheduledCount', 'conflictCount', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'title', 'baseVersion', 'scenarioType', 'summaryText',
+        'scheduledCount', 'unscheduledCount', 'conflictCount', 'createdAt'
+      ]) &&
+      data.userId is string && data.userId == uid &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+      data.baseVersion is number && data.baseVersion >= 0 &&
+      data.scenarioType is string && data.scenarioType.size() <= 80 &&
+      data.summaryText is string && data.summaryText.size() <= 2000 &&
+      data.scheduledCount is number && data.scheduledCount >= 0 &&
+      data.unscheduledCount is number && data.unscheduledCount >= 0 &&
+      data.conflictCount is number && data.conflictCount >= 0 &&
+      isValidIsoString(data.createdAt);
+    }
+
+    // User root document and subcollections
+    match /users/{uid} {
+      allow get: if isOwner(uid) && isValidId(uid);
+      allow list: if false;
+      allow create: if isOwner(uid) && isValidId(uid) && isValidUserProfile(incoming(), uid);
+      allow update: if isOwner(uid) && isValidId(uid) && isValidUserProfile(incoming(), uid) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+      allow delete: if false;
+
+      match /tasks/{taskId} {
+        allow get: if isOwner(uid) && isValidId(taskId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(taskId) && isValidTask(incoming(), uid);
+        allow update: if isOwner(uid) && isValidId(taskId) && isValidTask(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(uid) && isValidId(taskId);
+      }
+
+      match /goals/{goalId} {
+        allow get: if isOwner(uid) && isValidId(goalId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(goalId) && isValidGoal(incoming(), uid);
+        allow update: if isOwner(uid) && isValidId(goalId) && isValidGoal(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(uid) && isValidId(goalId);
+      }
+
+      match /routines/{routineId} {
+        allow get: if isOwner(uid) && isValidId(routineId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(routineId) && isValidRoutine(incoming(), uid);
+        allow update: if isOwner(uid) && isValidId(routineId) && isValidRoutine(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(uid) && isValidId(routineId);
+      }
+
+      match /scheduleBlocks/{blockId} {
+        allow get: if isOwner(uid) && isValidId(blockId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(blockId) && isValidScheduleBlock(incoming(), uid);
+        allow update: if isOwner(uid) && isValidId(blockId) && isValidScheduleBlock(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(uid) && isValidId(blockId);
+      }
+
+      match /plans/{planId} {
+        allow get: if isOwner(uid) && isValidId(planId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(planId) && isValidPlan(incoming(), uid) &&
+          incoming().currentVersion == 1;
+        allow update: if isOwner(uid) && isValidId(planId) && isValidPlan(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().currentVersion == existing().currentVersion + 1;
+        allow delete: if false;
+      }
+
+      // Immutable PlanVersions (cannot be updated or deleted once created)
+      match /planVersions/{versionId} {
+        allow get: if isOwner(uid) && isValidId(versionId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(versionId) && isValidPlanVersion(incoming(), uid);
+        allow update, delete: if false;
+
+        match /chunks/{chunkId} {
+          allow get: if isOwner(uid) && isValidId(chunkId);
+          allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+          allow create: if isOwner(uid) && isValidId(chunkId) && isValidPlanVersionChunk(incoming(), uid);
+          allow update, delete: if false;
+        }
+      }
+
+      match /focusSessions/{sessionId} {
+        allow get: if isOwner(uid) && isValidId(sessionId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(sessionId) && isValidFocusSession(incoming(), uid);
+        allow update: if isOwner(uid) && isValidId(sessionId) && isValidFocusSession(incoming(), uid) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt;
+        allow delete: if false;
+      }
+
+      // Immutable Activity Audit Trail (append-only, cannot be modified or deleted)
+      match /activities/{activityId} {
+        allow get: if isOwner(uid) && isValidId(activityId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(activityId) && isValidActivityLog(incoming(), uid);
+        allow update, delete: if false;
+      }
+
+      match /simulations/{simulationId} {
+        allow get: if isOwner(uid) && isValidId(simulationId);
+        allow list: if isOwner(uid) && existing().userId == request.auth.uid;
+        allow create: if isOwner(uid) && isValidId(simulationId) && isValidSimulationRecord(incoming(), uid);
+        allow update: if false;
+        allow delete: if isOwner(uid) && isValidId(simulationId);
+      }
+    }
+  }
+}

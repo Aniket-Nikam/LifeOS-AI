@@ -1,0 +1,399 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile, timezone, sleep/focus windows, and scheduling preferences.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "sleepStartHHmm": { "type": "string", "maxLength": 5, "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+        "sleepEndHHmm": { "type": "string", "maxLength": 5, "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+        "focusStartHHmm": { "type": "string", "maxLength": 5, "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+        "focusEndHHmm": { "type": "string", "maxLength": 5, "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+        "workDays": { "type": "array" },
+        "breakDurationMinutes": { "type": "number" },
+        "maxContinuousWorkMinutes": { "type": "number" },
+        "theme": { "type": "string", "enum": ["dark", "light"] },
+        "onboardingComplete": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "timezone",
+        "sleepStartHHmm",
+        "sleepEndHHmm",
+        "focusStartHHmm",
+        "focusEndHHmm",
+        "workDays",
+        "breakDurationMinutes",
+        "maxContinuousWorkMinutes",
+        "theme",
+        "onboardingComplete",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "User task with separate estimated, actual, and remaining effort fields and hard/soft scheduling constraints.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "enum": ["academic", "coding", "work", "fitness", "hobby", "personal"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "estimatedMinutes": { "type": "number" },
+        "actualMinutes": { "type": "number" },
+        "remainingMinutes": { "type": "number" },
+        "earliestStartAt": { "type": "string", "maxLength": 40 },
+        "dueAt": { "type": "string", "maxLength": 40 },
+        "isFixed": { "type": "boolean" },
+        "fixedStartAt": { "type": "string", "maxLength": 40 },
+        "fixedEndAt": { "type": "string", "maxLength": 40 },
+        "isSplittable": { "type": "boolean" },
+        "minSessionMinutes": { "type": "number" },
+        "preferredTimeOfDay": { "type": "string", "enum": ["morning", "afternoon", "evening", "night", "any"] },
+        "energyLevel": { "type": "string", "enum": ["low", "medium", "high"] },
+        "status": { "type": "string", "enum": ["inbox", "scheduled", "in_progress", "complete", "skipped", "archived"] },
+        "goalId": { "type": "string", "maxLength": 128 },
+        "completedAt": { "type": "string", "maxLength": 40 },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "title",
+        "description",
+        "category",
+        "priority",
+        "estimatedMinutes",
+        "actualMinutes",
+        "remainingMinutes",
+        "isFixed",
+        "isSplittable",
+        "minSessionMinutes",
+        "preferredTimeOfDay",
+        "energyLevel",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "Long-term goal with measurable milestones and linked tasks.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "enum": ["academic", "coding", "work", "fitness", "hobby", "personal"] },
+        "targetDate": { "type": "string", "maxLength": 40 },
+        "milestones": { "type": "array" },
+        "progressPercent": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "completed", "paused"] },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "title",
+        "description",
+        "category",
+        "targetDate",
+        "milestones",
+        "progressPercent",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Routine": {
+      "title": "Routine",
+      "description": "Recurring routine definition with bounded exception overrides.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "category": { "type": "string", "enum": ["academic", "coding", "work", "fitness", "hobby", "personal"] },
+        "frequency": { "type": "string", "enum": ["daily", "weekdays", "selected_days", "weekly", "interval"] },
+        "daysOfWeek": { "type": "array" },
+        "intervalDays": { "type": "number" },
+        "startDate": { "type": "string", "maxLength": 20 },
+        "endDate": { "type": "string", "maxLength": 20 },
+        "preferredStartHHmm": { "type": "string", "maxLength": 5 },
+        "preferredEndHHmm": { "type": "string", "maxLength": 5 },
+        "durationMinutes": { "type": "number" },
+        "isFixed": { "type": "boolean" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "skippedDates": { "type": "array" },
+        "overridesJson": { "type": "string", "maxLength": 10000 },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "title",
+        "category",
+        "frequency",
+        "daysOfWeek",
+        "intervalDays",
+        "startDate",
+        "preferredStartHHmm",
+        "preferredEndHHmm",
+        "durationMinutes",
+        "isFixed",
+        "priority",
+        "skippedDates",
+        "overridesJson",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ScheduleBlock": {
+      "title": "ScheduleBlock",
+      "description": "Validated time block on the active user schedule.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "planId": { "type": "string", "maxLength": 128 },
+        "scheduleVersion": { "type": "number" },
+        "dateKey": { "type": "string", "maxLength": 15 },
+        "startAt": { "type": "string", "maxLength": 40 },
+        "endAt": { "type": "string", "maxLength": 40 },
+        "durationMinutes": { "type": "number" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "category": { "type": "string", "enum": ["academic", "coding", "work", "fitness", "hobby", "personal", "break", "external"] },
+        "blockType": { "type": "string", "enum": ["task", "routine", "fixed", "break", "external_calendar"] },
+        "taskId": { "type": "string", "maxLength": 128 },
+        "routineId": { "type": "string", "maxLength": 128 },
+        "occurrenceDate": { "type": "string", "maxLength": 20 },
+        "locked": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["planned", "in_progress", "completed", "skipped"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "reasonCode": { "type": "string", "maxLength": 120 },
+        "source": { "type": "string", "enum": ["scheduler", "manual", "reality_shift", "google_calendar"] },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "planId",
+        "scheduleVersion",
+        "dateKey",
+        "startAt",
+        "endAt",
+        "durationMinutes",
+        "title",
+        "category",
+        "blockType",
+        "locked",
+        "status",
+        "priority",
+        "reasonCode",
+        "source",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Plan": {
+      "title": "Plan",
+      "description": "Active schedule plan metadata with monotonic version counter.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "horizonStart": { "type": "string", "maxLength": 20 },
+        "horizonEnd": { "type": "string", "maxLength": 20 },
+        "currentVersion": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "lastReason": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "horizonStart",
+        "horizonEnd",
+        "currentVersion",
+        "status",
+        "lastReason",
+        "updatedAt"
+      ]
+    },
+    "PlanVersion": {
+      "title": "PlanVersion",
+      "description": "Immutable version audit metadata for schedule snapshots and Undo.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "planId": { "type": "string", "maxLength": 128 },
+        "version": { "type": "number" },
+        "parentVersion": { "type": "number" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "blockCount": { "type": "number" },
+        "chunkCount": { "type": "number" },
+        "summaryText": { "type": "string", "maxLength": 2000 },
+        "serverValidated": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "planId",
+        "version",
+        "parentVersion",
+        "reason",
+        "blockCount",
+        "chunkCount",
+        "summaryText",
+        "serverValidated",
+        "createdAt"
+      ]
+    },
+    "PlanVersionChunk": {
+      "title": "PlanVersionChunk",
+      "description": "Bounded chunk of up to 40 schedule blocks for a PlanVersion to prevent oversized documents.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "version": { "type": "number" },
+        "chunkIndex": { "type": "number" },
+        "blocks": { "type": "array" },
+        "createdAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "version",
+        "chunkIndex",
+        "blocks",
+        "createdAt"
+      ]
+    },
+    "FocusSession": {
+      "title": "FocusSession",
+      "description": "Timestamp-accurate focus timer session record.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "taskId": { "type": "string", "maxLength": 128 },
+        "taskTitle": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "enum": ["running", "paused", "completed", "stopped"] },
+        "plannedMinutes": { "type": "number" },
+        "startedAt": { "type": "string", "maxLength": 40 },
+        "lastResumedAt": { "type": "string", "maxLength": 40 },
+        "endedAt": { "type": "string", "maxLength": 40 },
+        "accumulatedSeconds": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "taskId",
+        "taskTitle",
+        "status",
+        "plannedMinutes",
+        "startedAt",
+        "accumulatedSeconds",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Immutable append-only audit log of user and server actions.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "action": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "createdAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "action",
+        "targetId",
+        "summary",
+        "createdAt"
+      ]
+    },
+    "SimulationRecord": {
+      "title": "SimulationRecord",
+      "description": "Saved What-If simulation scenario and comparison output.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "baseVersion": { "type": "number" },
+        "scenarioType": { "type": "string", "maxLength": 80 },
+        "summaryText": { "type": "string", "maxLength": 2000 },
+        "scheduledCount": { "type": "number" },
+        "unscheduledCount": { "type": "number" },
+        "conflictCount": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 40 }
+      },
+      "required": [
+        "userId",
+        "title",
+        "baseVersion",
+        "scenarioType",
+        "summaryText",
+        "scheduledCount",
+        "unscheduledCount",
+        "conflictCount",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile and scheduling preferences."
+    },
+    "/users/{uid}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "User tasks and fixed commitments."
+    },
+    "/users/{uid}/goals/{goalId}": {
+      "schema": { "$ref": "#/entities/Goal" },
+      "description": "Long-term goals and milestones."
+    },
+    "/users/{uid}/routines/{routineId}": {
+      "schema": { "$ref": "#/entities/Routine" },
+      "description": "Recurring routines and per-date exceptions."
+    },
+    "/users/{uid}/scheduleBlocks/{blockId}": {
+      "schema": { "$ref": "#/entities/ScheduleBlock" },
+      "description": "Active schedule blocks."
+    },
+    "/users/{uid}/plans/{planId}": {
+      "schema": { "$ref": "#/entities/Plan" },
+      "description": "Active plan metadata and version pointer."
+    },
+    "/users/{uid}/planVersions/{versionId}": {
+      "schema": { "$ref": "#/entities/PlanVersion" },
+      "description": "Immutable plan version audit records."
+    },
+    "/users/{uid}/planVersions/{versionId}/chunks/{chunkId}": {
+      "schema": { "$ref": "#/entities/PlanVersionChunk" },
+      "description": "Bounded chunks of historical schedule blocks for a plan version."
+    },
+    "/users/{uid}/focusSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/FocusSession" },
+      "description": "Focus execution sessions."
+    },
+    "/users/{uid}/activities/{activityId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "Immutable audit trail of scheduling and task actions."
+    },
+    "/users/{uid}/simulations/{simulationId}": {
+      "schema": { "$ref": "#/entities/SimulationRecord" },
+      "description": "Isolated What-If simulation records."
+    }
+  }
+}

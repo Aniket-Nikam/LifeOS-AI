@@ -1,0 +1,6 @@
+{
+  "name": "LifeOS — The Adaptive Personal Operating System",
+  "description": "Your time. Intelligently arranged. A constraint-aware personal operating system that turns goals, tasks, routines, and commitments into realistic schedules that adapt when life changes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

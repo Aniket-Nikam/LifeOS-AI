@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* Light Mode Tokens */
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #FFFFFF;
+    --bg-elevated: #F1F5F9;
+    --border-subtle: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --accent-primary: #0891B2;
+    --accent-secondary: #0D9488;
+    --accent-ai: #7C3AED;
+    --status-warning: #D97706;
+    --status-error: #E11D48;
+  }
+
+  .dark {
+    /* Dark-First Linear/Raycast/Notion Calendar Palette */
+    --bg-primary: #080C14;
+    --bg-secondary: #101722;
+    --bg-elevated: #161F2D;
+    --border-subtle: rgba(148, 163, 184, 0.12);
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --accent-primary: #22D3EE;
+    --accent-secondary: #14B8A6;
+    --accent-ai: #A78BFA;
+    --status-warning: #F59E0B;
+    --status-error: #FB7185;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono, .tabular-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.38);
+}
+
+@keyframes lifeosFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lifeosSlideInRight {
+  from {
+    opacity: 0.4;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.lifeos-fade-up {
+  animation: lifeosFadeSlideUp 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.lifeos-slide-right {
+  animation: lifeosSlideInRight 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
